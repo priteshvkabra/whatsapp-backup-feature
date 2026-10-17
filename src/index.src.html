@@ -1,0 +1,33 @@
+<title>WhatsApp Chat Backup Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Roboto:wght@400;500;700&display=swap">
+<style>/*PAGECSS*/
+/*PHONECSS*/
+.solo{display:flex;flex-direction:column;align-items:center;gap:14px;max-width:400px;margin:0 auto}
+.solo .top{display:flex;justify-content:space-between;align-items:center;width:100%;gap:10px}
+.solo .tiny{font-size:12px;color:var(--muted);text-align:center}
+.solo .ctrl{gap:8px;justify-content:flex-start}
+.solo .about{position:relative;top:auto;right:auto}
+</style>
+
+<div class="solo">
+  <div class="top">
+    <div class="ctrl"><button class="btn" id="reinstall">Reinstall WhatsApp</button><button class="btn" id="reset">Start over</button></div>
+    <div class="about"><button class="about-btn" id="about-btn" aria-expanded="false" aria-controls="about-pop" aria-label="About this prototype">i</button>
+      <div class="about-pop" id="about-pop" hidden><b>Unofficial concept.</b> Independent product teardown, not affiliated with WhatsApp or Meta. Names, chats and sizes are examples. Built by Pritesh Kabra.</div></div>
+  </div>
+  <div id="phone"></div>
+  <a class="pill pri" href="walkthrough.html">Guided walkthrough →</a>
+</div>
+
+<script>/*APPJS*/</script>
+<script>
+const api = WA.mount(document.getElementById('phone'), {preset: 'failing'});
+document.getElementById('reinstall').onclick = () => api.reinstall();
+document.getElementById('reset').onclick = () => api.reset('failing');
+const ab = document.getElementById('about-btn'), ap = document.getElementById('about-pop');
+ab.onclick = () => { ap.hidden = !ap.hidden; ab.setAttribute('aria-expanded', !ap.hidden); };
+document.addEventListener('click', e => { if (!e.target.closest('.about')) { ap.hidden = true; ab.setAttribute('aria-expanded', false); } });
+</script>

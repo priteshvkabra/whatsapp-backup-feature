@@ -1,0 +1,95 @@
+<title>WhatsApp Chat Backup Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Roboto:wght@400;500;700&display=swap">
+<style>/*PAGECSS*/
+/*PHONECSS*/
+.guide{max-width:820px;margin:0 auto;display:grid;gap:16px}
+.guide .about{position:relative;top:auto;right:auto}
+.guide .top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.gstage{display:grid;grid-template-columns:360px minmax(0,1fr);gap:32px;align-items:start}
+.gstage #phone{grid-column:1;grid-row:1}
+.gstage .card{grid-column:2;grid-row:1;position:sticky;top:16px}
+.card h2{font-family:var(--display);font-size:24px;line-height:1.2;margin:4px 0 10px;text-wrap:balance}
+.card .ctrl{justify-content:flex-start}
+@media (max-width:820px){.gstage{grid-template-columns:minmax(0,1fr);gap:14px;justify-items:center}.gstage .card,.gstage #phone{grid-column:1}.gstage .card{grid-row:1;position:static;width:100%;max-width:400px}.gstage #phone{grid-row:2}.card h2{font-size:20px}}
+</style>
+
+<div class="guide">
+  <div class="top"><a class="pill" href="index.html">← Prototype</a>
+    <div class="about"><button class="about-btn" id="about-btn" aria-expanded="false" aria-controls="about-pop" aria-label="About this walkthrough">i</button>
+      <div class="about-pop" id="about-pop" hidden><b>Unofficial concept.</b> Independent product teardown, not affiliated with WhatsApp or Meta. Names, chats and sizes are examples. Built by Pritesh Kabra.</div></div></div>
+  <div class="gstage">
+    <section class="card" aria-live="polite">
+      <div class="kicker" id="w-k"></div>
+      <h2 id="w-title"></h2>
+      <div class="rows"><div><b>Today</b><span id="w-today"></span></div><div class="n"><b>New</b><span id="w-new"></span></div></div>
+      <p class="try" id="w-do"></p>
+      <div class="ctrl"><button class="btn" id="prev">Back</button><button class="btn pri" id="next">Next</button><button class="btn" id="restart">Start over</button></div>
+    </section>
+    <div id="phone"></div>
+  </div>
+</div>
+
+<script>/*APPJS*/</script>
+<script>
+const api = WA.mount(document.getElementById('phone'), {preset: 'failing'});
+const S = () => api.state;
+const STEPS = [
+ {t: 'Know when your backup stops', setup: () => { api.reset('failing'); }, hint: 'banner',
+  today: 'When Google Account storage is full, backups stop and you may not notice.',
+  now: 'A banner tells you, and lets you choose which chats to back up.',
+  doit: 'Tap “Choose chats”.', done: s => api.top().s === 'choose'},
+ {t: 'Choose what to back up', setup: () => { api.reset('failing'); api.set({stack: [{s:'home'},{s:'choose'}]}); }, hint: 'tog-college',
+  today: 'To make space, you delete photos and videos from your phone.',
+  now: 'Turn off backup for chats you don’t need, like an old college group.',
+  doit: 'Turn off College Batch 2017.', done: s => s.excluded.has('college') || (s.overlay && s.overlay.id === 'college')},
+ {t: 'Know what changes', setup: () => { api.reset('failing'); api.set({stack: [{s:'home'},{s:'choose'}], overlay: {t:'confirm', id:'college'}}); }, hint: 'leave-out',
+  today: 'Nothing explains what happens to your chats.',
+  now: 'The chat stays on your phone, but can’t be restored on a new phone.',
+  doit: 'Tap “Turn off”.', done: s => s.excluded.has('college')},
+ {t: 'Your backup works again', setup: () => { api.reset('failing'); S().excluded.add('college'); api.set({stack: [{s:'home'},{s:'settings'},{s:'chats'},{s:'backup'}]}); }, hint: 'backup-btn',
+  today: 'Buy more storage, or keep deleting.',
+  now: 'Your backup fits in your free storage again.',
+  doit: 'Tap “Back up”.', done: s => s.backup === 'done'},
+ {t: 'Nothing is deleted', setup: () => { api.reset('later'); }, hint: 'row-college',
+  today: 'Making space meant losing photos for good.',
+  now: 'Every message and photo is still on your phone.',
+  doit: 'Open College Batch 2017.', done: s => api.top().s === 'chat' && api.top().id === 'college'},
+ {t: 'Change it from any chat', setup: () => { api.reset('later'); api.set({stack: [{s:'home'},{s:'chat',id:'college'}]}); }, hint: 'chat-header',
+  today: 'There’s no backup setting inside a chat.',
+  now: '“Include in backup” sits in chat info, next to Chat lock.',
+  doit: 'Tap the group name.', done: s => api.top().s === 'info'},
+ {t: 'Restore works as before', setup: () => { api.reset('newphone'); }, hint: 'restore-btn',
+  today: 'You restore your last backup.',
+  now: 'Exactly the same screen.',
+  doit: 'Tap “Restore”, then “Next”.', done: s => !s.newphone && s.chats.some(c => c.fresh)},
+ {t: 'No confusing empty chats', setup: () => { api.reset('newphone'); api.finishRestore(); }, hint: 'row-college',
+  today: 'A group could come back empty, as if WhatsApp lost it.',
+  now: 'One line explains why older messages aren’t there.',
+  doit: 'Open College Batch 2017.', done: s => api.top().s === 'chat' && api.top().id === 'college'}
+];
+let cur = 0;
+function show(i) {
+  cur = i; STEPS[i].setup(); api.hint(STEPS[i].hint); paint();
+}
+function paint() {
+  const st = STEPS[cur], d = st.done(S());
+  document.getElementById('w-k').textContent = `Step ${cur + 1} of ${STEPS.length}`;
+  document.getElementById('w-title').textContent = st.t;
+  document.getElementById('w-today').textContent = st.today;
+  document.getElementById('w-new').textContent = st.now;
+  document.getElementById('w-do').innerHTML = d ? `<span class="done">Done.</span> ${cur < STEPS.length - 1 ? 'Tap Next.' : 'That’s it.'}` : '<b>Do:</b> ' + st.doit;
+  document.getElementById('prev').disabled = cur === 0;
+  const nx = document.getElementById('next'); nx.disabled = cur === STEPS.length - 1; nx.textContent = 'Next';
+}
+api.onChange(() => { if (typeof cur === 'number') paint(); });
+document.getElementById('next').onclick = () => cur < STEPS.length - 1 && show(cur + 1);
+document.getElementById('prev').onclick = () => cur > 0 && show(cur - 1);
+document.getElementById('restart').onclick = () => show(0);
+const ab = document.getElementById('about-btn'), ap = document.getElementById('about-pop');
+ab.onclick = () => { ap.hidden = !ap.hidden; ab.setAttribute('aria-expanded', !ap.hidden); };
+document.addEventListener('click', e => { if (!e.target.closest('.about')) { ap.hidden = true; ab.setAttribute('aria-expanded', false); } });
+show(0);
+</script>

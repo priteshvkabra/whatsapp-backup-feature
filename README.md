@@ -2,6 +2,8 @@
 
 A product teardown and working prototype by **Pritesh Kabra**.
 
+![The prototype in 21 seconds: the backup stops, a chat is turned off, the backup fits again, and a restore explains what was left out](choose-chats.gif)
+
 When free Google storage fills up, WhatsApp on Android stops backing up, and the only fixes today are to pay for more storage or delete photos and chats. This concept adds one control WhatsApp doesn't have: **choose which chats go into the backup**. Nothing is deleted from the phone, and Include videos, frequency and encryption work as they do today.
 
 ## Try it
